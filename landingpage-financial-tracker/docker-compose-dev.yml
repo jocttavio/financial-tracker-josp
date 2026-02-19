@@ -1,0 +1,14 @@
+
+services:
+  app:
+    container_name: container-landingpage-financial-tracker
+    build:
+      context: .
+      dockerfile: Dockerfile.mounted
+    ports:
+      - "3000:3000"  # Mapea puerto 3000 (host) → 3000 (contenedor)
+    volumes:
+      - .:/app
+      - /app/node_modules  # Para evitar conflictos con node_modules local
+    environment:
+      NODE_ENV: development
