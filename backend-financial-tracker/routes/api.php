@@ -7,4 +7,5 @@ use Illuminate\Support\Facades\Route;
 Route::get('/user', function (Request $request) {
     throw new CustomError("Este es un error personalizado", 400, null, ['info' => 'Datos adicionales del error']);
 });
-    
+
+require base_path('app/Http/Auth/AuthRoutes.php');
