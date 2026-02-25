@@ -85,15 +85,18 @@ return new class extends Migration
             $table->foreign('account_id')->references('id_account')->on('accounts')->onDelete('cascade');
         });
 
-        Schema::table('transactions', function (Blueprint $table) {
-            $table->unsignedBigInteger('account_id')->after('id_transaction');
+        Schema::create('transactions', function (Blueprint $table) {
+            $table->id('id_transaction');
             $table->text('description')->nullable();
             $table->string('payment_method')->nullable();
             $table->string('place')->nullable();
             $table->date('date');
+            $table->unsignedBigInteger('account_id');
+
+            $table->foreign('account_id')->references('id_account')->on('accounts')->onDelete('cascade');
         });
 
-        Schema::table('transaction_details', function (Blueprint $table) {
+        Schema::create('transaction_details', function (Blueprint $table) {
             $table->id('id_transaction_detail');
             $table->decimal('amount', 10, 2)->after('id_transaction_detail');   
             $table->decimal('unit_price', 10, 2)->after('amount');
@@ -108,7 +111,7 @@ return new class extends Migration
             $table->foreign('transaction_id')->references('id_transaction')->on('transactions')->onDelete('cascade');
         });
 
-        Schema::table('payments', function (Blueprint $table) {
+        Schema::create('payments', function (Blueprint $table) {
             $table->id('id_payment');
             $table->decimal('amount', 10, 2)->after('id_payment');
             $table->string('payment_method')->nullable();
@@ -125,7 +128,7 @@ return new class extends Migration
             
         });
 
-        Schema::table('savings', function (Blueprint $table) {
+        Schema::create('savings', function (Blueprint $table) {
             $table->id('id_saving');
             $table->string('name')->after('id_saving');
             $table->string('description')->nullable();
@@ -155,5 +158,8 @@ return new class extends Migration
         Schema::dropIfExists('categories');
         Schema::dropIfExists('products_services');
         Schema::dropIfExists('accounts');
+        Schema::dropIfExists('transaction_details');
+        Schema::dropIfExists('payments');
+        Schema::dropIfExists('savings');
     }
 };
