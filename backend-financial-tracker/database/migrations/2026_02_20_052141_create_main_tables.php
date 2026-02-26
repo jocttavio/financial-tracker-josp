@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('description')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('categories', function (Blueprint $table) {
@@ -23,6 +24,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('description')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('accounts', function (Blueprint $table) {
@@ -31,6 +33,7 @@ return new class extends Migration
             $table->string('type');
             $table->decimal('current_balance', 10, 2)->default(0);
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('revenue', function (Blueprint $table) {
@@ -40,12 +43,11 @@ return new class extends Migration
             $table->date('date');
             $table->timestamps();
             $table->unsignedBigInteger('account_id');
-            $table->unsignedBigInteger('product_service_id');
             $table->unsignedBigInteger('category_id');
 
             $table->foreign('account_id')->references('id_account')->on('accounts')->onDelete('cascade');
-            $table->foreign('product_service_id')->references('id_product_service')->on('products_services')->onDelete('cascade');
             $table->foreign('category_id')->references('id_category')->on('categories')->onDelete('cascade');
+            $table->softDeletes();
         });
 
         Schema::create('expenses', function (Blueprint $table) {
@@ -60,6 +62,7 @@ return new class extends Migration
 
             $table->foreign('category_id')->references('id_category')->on('categories')->onDelete('cascade');
             $table->foreign('product_service_id')->references('id_product_service')->on('products_services')->onDelete('cascade');
+            $table->softDeletes();
         });
 
         Schema::create('movements_account_history', function (Blueprint $table) {
@@ -72,6 +75,7 @@ return new class extends Migration
             $table->unsignedBigInteger('account_id');
 
             $table->foreign('account_id')->references('id_account')->on('accounts')->onDelete('cascade');
+            $table->softDeletes();
         });
 
         Schema::create('debts', function (Blueprint $table) {
@@ -83,6 +87,7 @@ return new class extends Migration
             $table->unsignedBigInteger('account_id');
 
             $table->foreign('account_id')->references('id_account')->on('accounts')->onDelete('cascade');
+            $table->softDeletes();
         });
 
         Schema::create('transactions', function (Blueprint $table) {
@@ -94,11 +99,12 @@ return new class extends Migration
             $table->unsignedBigInteger('account_id');
 
             $table->foreign('account_id')->references('id_account')->on('accounts')->onDelete('cascade');
+            $table->softDeletes();
         });
 
         Schema::create('transaction_details', function (Blueprint $table) {
             $table->id('id_transaction_detail');
-            $table->decimal('amount', 10, 2)->after('id_transaction_detail');   
+            $table->decimal('amount', 10, 2)->after('id_transaction_detail');
             $table->decimal('unit_price', 10, 2)->after('amount');
             $table->decimal('subtotal', 10, 2)->after('unit_price');
             $table->unsignedBigInteger('product_service_id')->after('id_transaction_detail');
@@ -109,6 +115,7 @@ return new class extends Migration
             $table->foreign('product_service_id')->references('id_product_service')->on('products_services')->onDelete('cascade');
             $table->foreign('category_id')->references('id_category')->on('categories')->onDelete('cascade');
             $table->foreign('transaction_id')->references('id_transaction')->on('transactions')->onDelete('cascade');
+            $table->softDeletes();
         });
 
         Schema::create('payments', function (Blueprint $table) {
@@ -125,7 +132,7 @@ return new class extends Migration
             $table->foreign('origin_account_id')->references('id_account')->on('accounts')->onDelete('cascade');
             $table->foreign('transaction_id')->references('id_transaction')->on('transactions')->onDelete('cascade');
             $table->foreign('debt_id')->references('id_debt')->on('debts')->onDelete('cascade');
-            
+            $table->softDeletes();
         });
 
         Schema::create('savings', function (Blueprint $table) {
@@ -139,11 +146,8 @@ return new class extends Migration
             $table->unsignedBigInteger('account_id');
 
             $table->foreign('account_id')->references('id_account')->on('accounts')->onDelete('cascade');
-        }); 
-
-
-
-
+            $table->softDeletes();
+        });
     }
 
     /**
@@ -152,14 +156,15 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('movements_account_history');
-        Schema::dropIfExists('debts');
-        Schema::dropIfExists('expenses');    
-        Schema::dropIfExists('revenue');    
-        Schema::dropIfExists('categories');
-        Schema::dropIfExists('products_services');
-        Schema::dropIfExists('accounts');
-        Schema::dropIfExists('transaction_details');
+        Schema::dropIfExists('expenses');
+        Schema::dropIfExists('revenue');
         Schema::dropIfExists('payments');
+        Schema::dropIfExists('transaction_details');
+        Schema::dropIfExists('transactions');
+        Schema::dropIfExists('debts');
+        Schema::dropIfExists('products_services');
+        Schema::dropIfExists('categories');
         Schema::dropIfExists('savings');
+        Schema::dropIfExists('accounts');
     }
 };
