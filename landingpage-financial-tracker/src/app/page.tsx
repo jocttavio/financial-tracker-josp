@@ -1,9 +1,15 @@
-import Image from "next/image";
+import CategoryForm from "./components/CategoryForm";
+import Navbar from "./components/layouts/Navbar";
+import ProductServicesForm from "./components/ProductServicesForm";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-   <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">Financial Tracker</h1>
+    <div className="flex flex-col items-center justify-center ">
+      <Navbar />
+      <section className="min-h-90 flex flex-col items-center justify-center gap-4 mt-4">
+      <CategoryForm />
+      <ProductServicesForm />
+      </section>
     </div>
   );
 }
