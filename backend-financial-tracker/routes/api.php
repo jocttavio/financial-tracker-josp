@@ -15,5 +15,5 @@ Route::prefix('default')->group(function () {
     Route::get('/products-services', [DefaultController::class, 'getProductsServices']);
     Route::post('/products-services/create', [DefaultController::class, 'createProductsServices']);
 });
-
+require base_path('app/Http/Revenue/RevenueRoutes.php');
 require base_path('app/Http/Auth/AuthRoutes.php');
