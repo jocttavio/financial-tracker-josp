@@ -9,8 +9,10 @@ services:
     volumes:
       - .:/var/www/html
     networks:
-      - development
-      - financial_tracker_net_backend
+      development:
+          aliases:
+            - backend-api
+      financial_tracker_net_backend: {}
     depends_on:
       - postgres
     environment:
@@ -24,13 +26,13 @@ services:
     image: postgres:17.6
     container_name: financial-tracker-db
     ports:
-    - "5432:5432"
+      - "5432:5432"
     environment:
-    - POSTGRES_USER=${DB_USERNAME}
-    - POSTGRES_PASSWORD=${DB_PASSWORD}
-    - POSTGRES_DB=${DB_DATABASE}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_DATABASE}
     networks:
-    - financial_tracker_net_backend
+      - financial_tracker_net_backend
     volumes:
       - financial_tracker_data:/var/lib/postgresql/data
 
