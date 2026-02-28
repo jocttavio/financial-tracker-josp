@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\BaseController;
+use App\Models\Default\Accounts;
 use App\Models\Default\Categories;
 use App\Models\Default\ProductServices;
 use Illuminate\Http\Request;
@@ -20,6 +21,12 @@ class DefaultController extends BaseController
   {
     $productsServices = ProductServices::all();
     return $this->sendResponse($productsServices, "Products and Services retrieved successfully");
+  }
+
+  public function getAccounts()
+  {
+    $accounts = Accounts::all();
+    return $this->sendResponse($accounts, "Accounts retrieved successfully");
   }
 
   public function createCategories(Request $request)
@@ -52,5 +59,22 @@ class DefaultController extends BaseController
     ])->id_product_service;
 
     return $this->sendResponse($idProductService, "Product Service created successfully");
+  }
+
+  public function createAccount(Request $request)
+  {
+    $request->validate([
+      'name' => 'required|string|max:100',
+      'type' => 'required|string|in:savings,credit,debit',
+      'current_balance' => 'required|numeric|min:0',
+    ]);
+
+    $idAccount = Accounts::create([
+      'name' => $request->name,
+      'type' => $request->type,
+      'current_balance' => $request->current_balance,
+    ])->id_account;
+
+    return $this->sendResponse($idAccount, "Account created successfully");
   }
 }

@@ -21,6 +21,7 @@ class Revenue extends Model
         'description',
         'date',
         'category_id',
+        'account_id',
     ];
 
     protected $hidden = [

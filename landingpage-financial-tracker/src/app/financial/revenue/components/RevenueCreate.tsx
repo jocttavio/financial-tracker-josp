@@ -15,29 +15,72 @@ export default function RevenueCreate({
     description: "",
     amount: "",
     date: "",
+    id_category: 0,
   });
-  const [listCategories, setListCategories] = useState<{ name: string }[]>([]);
+  const [listCategories, setListCategories] = useState<
+    { name: string; id_category: number }[]
+  >([]);
+  const [listAccounts, setListAccounts] = useState<
+    { name: string; id_account: number }[]
+  >([]);
   const baseUrl = process.env.BACKEND_URL; // ej: http://
   const api = customApi();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  }
+  };
+
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleAccountChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
     let raf1: number | undefined;
     let raf2: number | undefined;
 
-     const fetchCategories = async () => {
+    const fetchCategories = async () => {
       try {
-        const {data} = await api.get('/default/categories');
-        console.log(data.data);
-        const payload: { success: boolean; data: { name: string, description: string , id_category: number, created_at: string}[]; message?: string } = data;
+        const { data: categoriesData } = await api.get("/default/categories");
+        const { data: accountsData } = await api.get("/default/accounts");
+        console.log(categoriesData.data);
+        console.log(accountsData.data);
+        setListCategories(Array.isArray(categoriesData.data) ? categoriesData.data : []);
+        setListAccounts(Array.isArray(accountsData.data) ? accountsData.data : []); 
+        const payload: {
+          success: boolean;
+          data: {
+            name: string;
+            description: string;
+            id_category: number;
+            created_at: string;
+          }[];
+          message?: string;
+        } = categoriesData;
         setListCategories(Array.isArray(payload.data) ? payload.data : []);
+
+        const payloadAccounts: {
+          success: boolean;
+          data: {
+            name: string;
+            type: string;
+            current_balance: number;
+            id_account: number;
+            created_at: string;
+          }[];
+          message?: string;
+        } = accountsData;
+        setListAccounts(Array.isArray(payloadAccounts.data) ? payloadAccounts.data : []);
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
-    }
+    };
 
     if (isOpen) {
       fetchCategories();
@@ -59,8 +102,22 @@ export default function RevenueCreate({
       if (raf2) cancelAnimationFrame(raf2);
     };
   }, [isOpen]);
-  if (!shouldRender) return null;
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await api.post("/revenue/create", formData);
+      console.log(response);
+      if (response.data.success) {
+        alert("Revenue created successfully!");
+        onClose(); // Cierra el modal después de enviar
+      }
+    } catch (error) {
+      console.error("Error creating revenue:", error);
+    }
+  };
+
+  if (!shouldRender) return null;
 
   return (
     <div
@@ -71,23 +128,64 @@ export default function RevenueCreate({
     >
       <div
         className={`bg-white p-6 rounded-md w-full max-w-md transform transition-all duration-200 ${
-          visible ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-2"
+          visible
+            ? "opacity-100 scale-100 translate-y-0"
+            : "opacity-0 scale-95 translate-y-2"
         }`}
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-2xl font-bold mb-4">Add Revenue</h2>
-        <form>
-          
-          <input type="text" name="description" id="description" placeholder="Description" className="w-full p-2 border border-gray-300 rounded mb-4" onChange={handleChange} />
-          <input type="number" name="amount" id="amount" placeholder="Amount" className="w-full p-2 border border-gray-300 rounded mb-4" onChange={handleChange} />
-          <input type="date" name="date" id="date" className="w-full p-2 border border-gray-300 rounded mb-4" onChange={handleChange} />
-            <select name="category" id="category" className="w-full p-2 border border-gray-300 rounded mb-4">
-              <option value="">Select Category</option>
-              {listCategories.map((cat, index) => (
-                <option key={index} value={cat.name}>{cat.name}</option>
-              ))}
-            </select>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            name="description"
+            id="description"
+            placeholder="Description"
+            className="w-full p-2 border border-gray-300 rounded mb-4"
+            onChange={handleChange}
+          />
+          <input
+            type="number"
+            name="amount"
+            id="amount"
+            placeholder="Amount"
+            className="w-full p-2 border border-gray-300 rounded mb-4"
+            onChange={handleChange}
+          />
+          <input
+            type="date"
+            name="date"
+            id="date"
+            className="w-full p-2 border border-gray-300 rounded mb-4"
+            onChange={handleChange}
+          />
+          <select
+            name="id_category"
+            id="category"
+            onChange={handleCategoryChange}
+            className="w-full p-2 border border-gray-300 rounded mb-4"
+          >
+            <option value="">Select Category</option>
+            {listCategories.map((cat, index) => (
+              <option key={index} value={cat.id_category}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
 
+          <select
+            name="id_account"
+            id="account"
+            onChange={handleAccountChange}
+            className="w-full p-2 border border-gray-300 rounded mb-4"
+          >
+            <option value="">Select Account</option>
+            {listAccounts.map((acc, index) => (
+              <option key={index} value={acc.id_account}>
+                {acc.name}
+              </option>
+            ))}
+          </select>
 
           <div className="flex justify-end">
             <button

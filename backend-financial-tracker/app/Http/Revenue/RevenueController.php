@@ -7,6 +7,8 @@ use App\Http\Revenue\Requests\SaveRevenueRequest;
 use App\Http\Revenue\RevenueValidations;
 use App\Models\Revenue;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class RevenueController extends BaseController
 {
@@ -26,9 +28,26 @@ class RevenueController extends BaseController
 
     public function store(SaveRevenueRequest $request)
     {
+
+        Log::info('Attempting to create a new revenue record.', ['request_data' => $request->all()]);
         $data = $request->validated();
-        $revenue = Revenue::create($data);
-        return $this->sendResponse($revenue, 'Revenue created successfully');
+        try {
+            $revenue = DB::transaction(function () use ($data) {
+                $revenue = Revenue::create([
+                    'amount' => $data['amount'],
+                    'description' => $data['description'],
+                    'date' => $data['date'],
+                    'category_id' => $data['id_category'],
+                    'account_id' => $data['id_account'],
+                ]);
+
+                return $revenue;
+            });
+            return $this->sendResponse($revenue, 'Revenue created successfully');
+        } catch (\Exception $e) {
+            Log::error('Error creating revenue record.', ['error_message' => $e->getMessage(), 'request_data' => $data]);
+            return $this->sendError('Error creating revenue record', [], 500);
+        }
     }
 }
 

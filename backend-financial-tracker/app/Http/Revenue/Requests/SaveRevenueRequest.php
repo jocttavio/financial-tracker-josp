@@ -27,8 +27,8 @@ class SaveRevenueRequest extends FormRequest
         return [
             'amount' => 'required|numeric',
             'date' => 'required|date',
-            'category_id' => 'required|exists:categories,id',
-            'product_service_id' => 'required|exists:products_services,id',
+            'id_account' => 'required',
+            'id_category' => 'required',
             'description' => 'nullable|string',
         ];
     }
@@ -40,10 +40,8 @@ class SaveRevenueRequest extends FormRequest
             'amount.numeric' => 'El campo monto debe ser un número.',
             'date.required' => 'El campo fecha es obligatorio.',
             'date.date' => 'El campo fecha debe ser una fecha válida.',
-            'category_id.required' => 'El campo categoría es obligatorio.',
-            'category_id.exists' => 'La categoría seleccionada no existe.',
-            'product_service_id.required' => 'El campo producto/servicio es obligatorio.',
-            'product_service_id.exists' => 'El producto/servicio seleccionado no existe.',
+            'id_account.required' => 'El campo cuenta es obligatorio.',
+            'id_category.required' => 'El campo categoría es obligatorio.',
             'description.string' => 'El campo descripción debe ser una cadena de texto.',
         ];
     }
@@ -52,6 +50,8 @@ class SaveRevenueRequest extends FormRequest
     {
         $this->merge([
             'description' => $this->normalizeString($this->input('description')),
+            'account_id' => $this->input('id_account'),
+            'category_id' => $this->input('id_category'),
         ]);
     }
 
