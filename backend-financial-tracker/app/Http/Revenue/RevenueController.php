@@ -49,5 +49,38 @@ class RevenueController extends BaseController
             return $this->sendError('Error creating revenue record', [], 500);
         }
     }
+    public function summary(Request $request)
+    {
+        try {
+            $summary = Revenue::select(
+                DB::raw('SUM(amount) as total_revenue'),
+                DB::raw('COUNT(*) as total_entries'),
+            )
+            ->first();
+
+            // subfunction to get revenue by category
+            $summaryByMonth = Revenue::select(
+                DB::raw('SUM(amount) as total_revenue_by_month'),
+                DB::raw('COUNT(*) as total_entries_by_month'),
+            )
+            ->whereMonth('date', now()->month)
+            ->whereYear('date', now()->year)
+            ->first();
+
+            // combine both summaries into a single response
+            $response = [
+                'total_revenue' => $summary->total_revenue,
+                'total_entries' => $summary->total_entries,
+                'average_revenue' => $summary->total_entries > 0 ? $summary->total_revenue / $summary->total_entries : 0,
+                'current_month_revenue' => $summaryByMonth->total_revenue_by_month ? $summaryByMonth->total_revenue_by_month : 0,
+                'current_month_entries' => $summaryByMonth->total_entries_by_month ? $summaryByMonth->total_entries_by_month : 0,
+            ];
+
+            return $this->sendResponse($response, 'Revenue summary retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error('Error retrieving revenue summary.', ['error_message' => $e->getMessage()]);
+            return $this->sendError('Error retrieving revenue summary', [], 500);
+        }
+    }
 }
 

@@ -8,4 +8,5 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('revenue')->group(function () {
     Route::get('/', [RevenueController::class, 'index']);
     Route::post('/create', [RevenueController::class, 'store']);
+    Route::get('/summary', [RevenueController::class, 'summary']);
 });

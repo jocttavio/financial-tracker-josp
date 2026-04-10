@@ -31,6 +31,6 @@ class Revenue extends Model
 
     public function category()
     {
-        return $this->belongsTo(Categories::class);
+        return $this->belongsTo(Categories::class, 'category_id', 'id_category');
     }
 }
