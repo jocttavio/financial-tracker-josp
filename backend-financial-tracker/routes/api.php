@@ -19,3 +19,4 @@ Route::prefix('default')->group(function () {
 });
 require base_path('app/Http/Revenue/RevenueRoutes.php');
 require base_path('app/Http/Auth/AuthRoutes.php');
+require base_path('app/Http/Expense/ExpenseRoutes.php');
