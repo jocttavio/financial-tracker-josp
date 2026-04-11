@@ -2,6 +2,7 @@ import RevenueTable from "./components/RevenueTable";
 import RevenueCreate from "./components/RevenueCreate";
 import RevenueBtnCreate from "./components/RevenueBtnCreate";
 import RevenueSummary from "./components/RevenueSummary";
+import RevenueTableResponsive from "./components/RevenueTableResponsive";
 export default function Revenue() {
   return (
     <div className="flex flex-col items-center justify-center md:p-4">
@@ -13,7 +14,12 @@ export default function Revenue() {
         <div className="my-4">
         <RevenueSummary />
         </div>
+        <div className="md:flex hidden md:justify-center">
         <RevenueTable />
+        </div>
+        <div className="flex md:hidden">
+          <RevenueTableResponsive />
+        </div>
       </section>
     </div>
   );
