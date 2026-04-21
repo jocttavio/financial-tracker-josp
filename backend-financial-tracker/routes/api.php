@@ -16,6 +16,7 @@ Route::prefix('default')->group(function () {
     Route::post('/products-services/create', [DefaultController::class, 'createProductsServices']);
     Route::get('/accounts', [DefaultController::class, 'getAccounts']);
     Route::post('/account/create', [DefaultController::class, 'createAccount']);
+    Route::get('/payment-methods', [DefaultController::class, 'getPaymentMethods']);
 });
 require base_path('app/Http/Revenue/RevenueRoutes.php');
 require base_path('app/Http/Auth/AuthRoutes.php');

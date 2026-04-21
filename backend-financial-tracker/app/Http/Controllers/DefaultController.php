@@ -29,6 +29,12 @@ class DefaultController extends BaseController
     return $this->sendResponse($accounts, "Accounts retrieved successfully");
   }
 
+  public function getPaymentMethods()
+  {
+    $paymentMethods = ['cash', 'credit_card', 'debit_card', 'bank_transfer', 'mobile_payment'];
+    return $this->sendResponse($paymentMethods, "Payment methods retrieved successfully");
+  }
+
   public function createCategories(Request $request)
   {
     $request->validate([
