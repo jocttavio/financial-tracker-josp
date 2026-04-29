@@ -9,7 +9,7 @@ export default function Revenue() {
       <h1 className="text-3xl font-bold my-4 text-start">Revenue Page</h1>
       <section>
         <div className="flex justify-end">
-        <RevenueBtnCreate />
+        <RevenueCreate />
         </div>
         <div className="my-4">
         <RevenueSummary />

@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import RevenueCreate from "./RevenueCreate";
-
+import { Button } from "@/components/ui/button";
 export default function RevenueBtnCreate() {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const handleClick = () => {
@@ -9,12 +9,14 @@ export default function RevenueBtnCreate() {
   };
   return (
     <section>
-      <button
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      <Button
+        variant="outline"
+        size="lg"
+        
         onClick={() => setIsModalOpen(true)}
       >
         Add Revenue
-      </button>
+      </Button>
       <RevenueCreate isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </section>
   );

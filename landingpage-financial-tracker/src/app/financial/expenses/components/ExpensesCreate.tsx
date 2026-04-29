@@ -32,6 +32,11 @@ import {
 
 import React from "react";
 import customApi from "@/app/client/custom_api";
+import { toast } from "sonner";
+
+
+
+
 const ExpensesCreate = () => {
   const api = customApi();
 
@@ -63,7 +68,7 @@ const ExpensesCreate = () => {
     try {
       const result = await api.post("/expenses/create", formExpense);
       if(result.data.success) {
-      alert("Expense created successfully!");
+        toast.success("Expense created successfully!",{ position: "top-center" });
       setFormExpense({
         description: "",
         amount: 0,
@@ -71,10 +76,7 @@ const ExpensesCreate = () => {
         id_category: "",
         payment_method: "",
         id_product_service: "",
-      });
-      // close the dialog if needed, or trigger a refresh of the expenses list
-      
-
+      });  
     }
       // Optionally, you can reset the form or show a success message here
     } catch (error) {
@@ -149,9 +151,6 @@ const ExpensesCreate = () => {
                         {cat.name}
                       </SelectItem>
                     ))}
-                    <SelectItem value="food"></SelectItem>
-                    <SelectItem key="transport" value="transport">Transport</SelectItem>
-                    <SelectItem value="entertainment">Entertainment</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -188,9 +187,6 @@ const ExpensesCreate = () => {
                         {ps.name}
                       </SelectItem>
                     ))}
-                    <SelectItem value="luz">Luz</SelectItem>
-                    <SelectItem value="internet">Internet</SelectItem>
-                    <SelectItem value="gas">Gas</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>

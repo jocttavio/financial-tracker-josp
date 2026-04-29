@@ -2,57 +2,68 @@
 import React from "react";
 import customApi from "@/app/client/custom_api";
 import { useEffect, useState } from "react";
-export default function RevenueCreate({
-  isOpen,
-  onClose,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-}) {
-  const [shouldRender, setShouldRender] = useState(isOpen);
-  const [visible, setVisible] = useState(false);
-  const [formData, setFormData] = useState({
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  FieldLabel,
+  FieldGroup,
+  Field,
+  FieldError,
+  FieldDescription,
+} from "@/components/ui/field";
+
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import { toast } from "sonner";
+
+function RevenueCreate() {
+  const [formRevenue, setFormRevenue] = useState({
     description: "",
     amount: "",
     date: "",
     id_category: 0,
   });
-  const [listCategories, setListCategories] = useState<
-    { name: string; id_category: number }[]
-  >([]);
-  const [listAccounts, setListAccounts] = useState<
-    { name: string; id_account: number }[]
-  >([]);
-  const baseUrl = process.env.BACKEND_URL; // ej: http://
+  const [listOptions, setListOptions] = React.useState({
+    categories: [] as { name: string; id_category: number }[],
+    accounts: [] as { name: string; id_account: number }[],
+  });
+
   const api = customApi();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormRevenue((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleAccountChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleSelectChange = (name: string, value: string) => {
+    setFormRevenue((prev) => ({ ...prev, [name]: value }));
   };
 
   useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    let raf1: number | undefined;
-    let raf2: number | undefined;
-
     const fetchCategories = async () => {
       try {
         const { data: categoriesData } = await api.get("/default/categories");
         const { data: accountsData } = await api.get("/default/accounts");
         console.log(categoriesData.data);
         console.log(accountsData.data);
-        setListCategories(Array.isArray(categoriesData.data) ? categoriesData.data : []);
-        setListAccounts(Array.isArray(accountsData.data) ? accountsData.data : []); 
         const payload: {
           success: boolean;
           data: {
@@ -63,8 +74,6 @@ export default function RevenueCreate({
           }[];
           message?: string;
         } = categoriesData;
-        setListCategories(Array.isArray(payload.data) ? payload.data : []);
-
         const payloadAccounts: {
           success: boolean;
           data: {
@@ -76,134 +85,163 @@ export default function RevenueCreate({
           }[];
           message?: string;
         } = accountsData;
-        setListAccounts(Array.isArray(payloadAccounts.data) ? payloadAccounts.data : []);
+
+        if (payload.success && payloadAccounts.success) {
+          setListOptions({
+            categories: Array.isArray(payload.data) ? payload.data : [],
+            accounts: Array.isArray(payloadAccounts.data)
+              ? payloadAccounts.data
+              : [],
+          });
+        } else {
+          toast.error("Failed to fetch categories or accounts", {
+            position: "top-center",
+          });
+        }
       } catch (error) {
         console.error("Error fetching categories:", error);
+        toast.error("An error occurred while fetching categories or accounts", {
+          position: "top-center",
+        });
       }
     };
-
-    if (isOpen) {
-      fetchCategories();
-      setShouldRender(true);
-      setVisible(false); // estado inicial para animar entrada
-      raf1 = requestAnimationFrame(() => {
-        raf2 = requestAnimationFrame(() => {
-          setVisible(true); // ahora sí anima al abrir
-        });
-      });
-    } else {
-      setVisible(false); // anima salida
-      timeoutId = setTimeout(() => setShouldRender(false), 200);
-    }
-
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-      if (raf1) cancelAnimationFrame(raf1);
-      if (raf2) cancelAnimationFrame(raf2);
-    };
-  }, [isOpen]);
+    fetchCategories();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await api.post("/revenue/create", formData);
+      const response = await api.post("/revenue/create", formRevenue);
       console.log(response);
       if (response.data.success) {
-        alert("Revenue created successfully!");
-        onClose(); // Cierra el modal después de enviar
+        toast.success("Revenue created successfully!", {
+          position: "top-center",
+        });
+      }else{
+        toast.error("Failed to create revenue: " + response.data.message, {
+          position: "top-center",
+        });
       }
+
+      setFormRevenue({
+        description: "",
+        amount: "",
+        date: "",
+        id_category: 0,
+      });
+
     } catch (error) {
       console.error("Error creating revenue:", error);
+      toast.error("An error occurred while creating revenue", {
+        position: "top-center",
+      });
     }
   };
 
-  if (!shouldRender) return null;
-
   return (
-    <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity duration-200 ${
-        visible ? "opacity-100" : "opacity-0"
-      }`}
-      onClick={onClose}
-    >
-      <div
-        className={`bg-white p-6 rounded-md w-full max-w-md transform transition-all duration-200 ${
-          visible
-            ? "opacity-100 scale-100 translate-y-0"
-            : "opacity-0 scale-95 translate-y-2"
-        }`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 className="text-2xl font-bold mb-4">Add Revenue</h2>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            name="description"
-            id="description"
-            placeholder="Description"
-            className="w-full p-2 border border-gray-300 rounded mb-4"
-            onChange={handleChange}
-          />
-          <input
-            type="number"
-            name="amount"
-            id="amount"
-            placeholder="Amount"
-            className="w-full p-2 border border-gray-300 rounded mb-4"
-            onChange={handleChange}
-          />
-          <input
-            type="date"
-            name="date"
-            id="date"
-            className="w-full p-2 border border-gray-300 rounded mb-4"
-            onChange={handleChange}
-          />
-          <select
-            name="id_category"
-            id="category"
-            onChange={handleCategoryChange}
-            className="w-full p-2 border border-gray-300 rounded mb-4"
-          >
-            <option value="">Select Category</option>
-            {listCategories.map((cat, index) => (
-              <option key={index} value={cat.id_category}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            name="id_account"
-            id="account"
-            onChange={handleAccountChange}
-            className="w-full p-2 border border-gray-300 rounded mb-4"
-          >
-            <option value="">Select Account</option>
-            {listAccounts.map((acc, index) => (
-              <option key={index} value={acc.id_account}>
-                {acc.name}
-              </option>
-            ))}
-          </select>
-
-          <div className="flex justify-end">
-            <button
-              type="button"
-              className="mr-2 px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-              onClick={onClose}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-            >
-              Save
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <Dialog>
+      <form>
+        <DialogTrigger asChild>
+          <Button variant="outline" size="lg">
+            Add Revenue
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Create Revenue</DialogTitle>
+            <DialogDescription>
+              Fill in the details for the new revenue.
+            </DialogDescription>
+          </DialogHeader>
+          <FieldGroup>
+            <Field>
+              <Label htmlFor="description">Description</Label>
+              <Input
+                id="description"
+                name="description"
+                value={formRevenue.description}
+                onChange={handleChange}
+              />
+            </Field>
+            <Field>
+              <Label htmlFor="amount">Amount</Label>
+              <Input
+                id="amount"
+                name="amount"
+                type="number"
+                value={formRevenue.amount}
+                onChange={handleChange}
+              />
+            </Field>
+            <Field>
+              <Label htmlFor="date">Date</Label>
+              <Input
+                id="date"
+                name="date"
+                type="date"
+                value={formRevenue.date}
+                onChange={handleChange}
+              />
+            </Field>
+            <Field>
+              <Label htmlFor="category">Category</Label>
+              <Select
+                onValueChange={(value: string) =>
+                  handleSelectChange("id_category", value)
+                }
+              >
+                <SelectTrigger className="w-full max-w-48">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Categories</SelectLabel>
+                    {listOptions.categories.map((cat) => (
+                      <SelectItem key={cat.id_category} value={cat.id_category}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </Field>
+            
+            <Field>
+              <Label htmlFor="account">Account</Label>
+              <Select
+                onValueChange={(value: string) =>
+                  handleSelectChange("id_account", value)
+                }
+              >
+                <SelectTrigger className="w-full max-w-48">
+                  <SelectValue placeholder="Select an account" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Accounts</SelectLabel>
+                    {listOptions.accounts.map((account) => (
+                      <SelectItem key={account.id_account} value={account.id_account}>
+                        {account.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </Field>
+          </FieldGroup>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button type="submit" onClick={handleSubmit}>
+              Save changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </form>
+    </Dialog>
   );
 }
+
+
+export default RevenueCreate;
